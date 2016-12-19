@@ -24,7 +24,6 @@ class Agent:
             greater than this value, agent would get negative reward.
           feedback_weight(default=1): Weight the feedback position.
           like_weight(default=1): Weight the final like signal.
-          batch_size(default=32): update size
         '''
         self.env = env
         self.history = deque(maxlen=history_len)
@@ -45,7 +44,8 @@ class Agent:
         This method defines the interaction processes. And it is the
         starting point of the interaction.
         '''
-        total_complete_percent = 0.0
+        total_complete = 0
+        total_queries = 0
         total_angry_percent = 0.0
         num_total_completed = 0
         data_collected_counter = 0
@@ -110,17 +110,18 @@ class Agent:
                 self.strategy.update(self.training_pool)
                 data_collected_counter = 0
 
-            completed_percent, angry_percent = self.env.curr_user.stats()
-            total_complete_percent += completed_percent
+            completed, num_queries, angry_percent = self.env.curr_user.stats()
+            total_complete += completed
+            total_queries += num_queries
             total_angry_percent += angry_percent
             total_rewards += current_reward
-            if completed_percent == 1.0:
+            if completed == num_queries:
                 num_total_completed += 1
         # Show all the statistics
         print('======== Final Statistics =======')
         print('Avg. reward: {0:.2f}'.format(total_rewards / n_episodes))
         print('Avg. completed: {0:.2f}%'.format(
-                100 * total_complete_percent / n_episodes))
+                100 * total_complete / total_queries))
         print('Avg. angry: {0:.2f}%'.format(
                 100 * total_angry_percent / n_episodes))
         print('Number of total completed: ', num_total_completed)

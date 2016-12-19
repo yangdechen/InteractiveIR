@@ -44,7 +44,7 @@ def main(docopt_args):
         feedback_weight=1,
         like_weight=1)
     # Training
-    agent.play(n_episodes=1000, isTraining=True)
+    agent.play(n_episodes=3000, isTraining=True)
     # Testing
     agent.play(n_episodes=1000, isTraining=False)
 

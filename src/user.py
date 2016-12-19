@@ -107,6 +107,6 @@ class User:
         return None
     def stats(self):
         '''This method is for performance measure.'''
-        return (self.completed_queries / len(self.query_list),
+        return (self.completed_queries, len(self.query_list),
                 self.angry / self.patience)
 
