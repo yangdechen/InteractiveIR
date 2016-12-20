@@ -2,7 +2,7 @@
 
 dtype=transcripts
 outdir=retrieval
-docdir=corpus/docs/$doctype
+docdir=corpus/docs/$dtype
 
 if [ ! -d "$outdir/index/" ]; then
     mkdir -p $outdir/index

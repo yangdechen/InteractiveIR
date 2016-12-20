@@ -19,15 +19,27 @@ from collections import defaultdict
 from util import read_keyword_dir
 
 class FeatGraph:
-    def __init__(self, graph, dim=64):
+    def __init__(self, graph, dim=64, p, q):
         self.graph = graph
+        self.dim = dim
+        self.p = p
+        self.q = q
 
     def run(self, n_iter=10):
-        pass
+        for _ in range(n_iter):
+            pass
 
 def construct_doc_graph(keyword_dir):
     '''
     Construct document graph with sharing keywords as edges.
+    doc_i and doc_j will have shared edges with weight equals
+    to the summation over sharing keywords.
+    (keyword weight in doc_i * keyword weight in doc_j)
+    
+    Returns:
+      doc2id: map document name to id
+      rev_doc2id: map id to document name
+      doc_graph: doc-doc graph
     '''
     # This construction uses less memory
     keyword_dict = read_keyword_dir(keyword_dir)
@@ -56,6 +68,14 @@ def construct_doc_graph(keyword_dir):
 def construct_keyword_graph(keyword_dir):
     '''
     Construct keyword graph with sharing documents as edges.
+    keyword_i and keyword_j will have shared edges with weight
+    equals to the summation over sharing documents.
+    (keyword_i weight in doc * keyword_j weight in doc)
+
+    Returns:
+      keyword2id: map keyword to id
+      rev_keyword2id: map id to keyword
+      keyword_graph: keyword-keyword graph
     '''
     # TODO: use too many memory, fix this.
     keyword_dict = read_keyword_dir(keyword_dir)
@@ -82,6 +102,7 @@ def construct_keyword_graph(keyword_dir):
     return keyword2id, rev_keyword2id, keyword_graph
 
 def main(docopt_args):
+    '''Construct the graph and run node2vec to get node features'''
     if docopt_args['<feat-type>'] == 'doc':
         node2id, rev_node2id, graph = \
             construct_doc_graph(docopt_args['<keyword-dir>'])
