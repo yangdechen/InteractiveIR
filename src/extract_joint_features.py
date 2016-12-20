@@ -19,15 +19,31 @@ from collections import defaultdict
 from util import read_keyword_dir
 
 class FeatGraph:
-    def __init__(self, graph, dim=64, p, q):
+    def __init__(self, graph, dim=64, p=1, q=1, num_walks=10, walk_len=20):
         self.graph = graph
         self.dim = dim
         self.p = p
         self.q = q
+        self.num_walks = num_walks
+        self.walk_len = walk_len
 
     def run(self, n_iter=10):
         for _ in range(n_iter):
             pass
+
+    def __random_walk_from_node(self, start_node):
+        walk = [start_node]
+        while len(walk) < self.walk_len:
+            cur = walk[-1]
+            cur_nbrs = self.graph.neighbors(cur)
+            if len(cur_nbrs) > 0:
+                pass
+            else:
+                break
+        return walk
+
+    def __random_walks(self):
+        pass
 
 def construct_doc_graph(keyword_dir):
     '''
