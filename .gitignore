@@ -1,0 +1,7 @@
+corpus/
+src/__pycache__/
+keyterm/
+retrieval/
+user_sim/
+stopword.txt
+*.pyc
