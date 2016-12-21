@@ -71,41 +71,36 @@ def read_stopwords(filename):
     return stopwords
 
 def alias_setup(probs):
-    '''alias method for setup
+    '''alias method setup
     '''
-    K = len(probs)
-    q = np.zeros(K)
-    J = np.zeros(K, dtype=np.int)
-
+    n = len(probs)
+    prob_table = np.zeros(n)
+    alias_table = np.zeros(n, dtype=np.int)
     smaller = []
     larger = []
-    for kk, prob in enumerate(probs):
-        q[kk] = K * prob
-        if q[kk] < 1.0:
-            smaller.append(kk)
+    for ind, prob in enumerate(probs):
+        prob_table[ind] = n * prob
+        if prob_table[ind] < 1.0:
+            smaller.append(ind)
         else:
-            larger.append(kk)
-
+            larger.append(ind)
     while len(smaller) > 0 and len(larger) > 0:
         small = smaller.pop()
-        larger = larger.pop()
-
-        J[small] = large
-        q[large] = q[large] - (1.0 - q[small])
-
-        if q[large] < 1.0:
+        large = larger.pop()
+        alias_table[small] = large
+        prob_table[large] += prob_table[small] - 1.0
+        if prob_table[large] < 1.0:
             smaller.append(large)
         else:
             larger.append(large)
-    return J, q
+    return alias_table, prob_table
 
-def alias_draw(J, q):
+def alias_draw(alias_table, prob_table):
     '''alias method sampling
     '''
-    K = len(J)
-    kk = int(np.floor(npr.random() * K))
-
-    if npr.rand() < q[kk]:
-        return kk
+    n = len(alias_table)
+    ind = int(np.floor(npr.random() * n))
+    if npr.rand() < prob_table[ind]:
+        return ind
     else:
-        return J[kk]
+        return alias_table[ind]
