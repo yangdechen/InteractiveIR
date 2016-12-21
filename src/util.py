@@ -7,6 +7,8 @@
 #   Utility function for convience.
 import os
 import pickle
+import numpy as np
+import numpy.random as npr
 
 def walk_all_files(dirname):
     '''Return an generator for all files in the "dirname"'''
@@ -67,3 +69,43 @@ def read_stopwords(filename):
         for w in infile:
             stopwords.add(w.strip())
     return stopwords
+
+def alias_setup(probs):
+    '''alias method for setup
+    '''
+    K = len(probs)
+    q = np.zeros(K)
+    J = np.zeros(K, dtype=np.int)
+
+    smaller = []
+    larger = []
+    for kk, prob in enumerate(probs):
+        q[kk] = K * prob
+        if q[kk] < 1.0:
+            smaller.append(kk)
+        else:
+            larger.append(kk)
+
+    while len(smaller) > 0 and len(larger) > 0:
+        small = smaller.pop()
+        larger = larger.pop()
+
+        J[small] = large
+        q[large] = q[large] - (1.0 - q[small])
+
+        if q[large] < 1.0:
+            smaller.append(large)
+        else:
+            larger.append(large)
+    return J, q
+
+def alias_draw(J, q):
+    '''alias method sampling
+    '''
+    K = len(J)
+    kk = int(np.floor(npr.random() * K))
+
+    if npr.rand() < q[kk]:
+        return kk
+    else:
+        return J[kk]

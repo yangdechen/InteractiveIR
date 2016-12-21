@@ -19,6 +19,8 @@ from collections import defaultdict
 from util import read_keyword_dir
 
 class FeatGraph:
+    '''Perform node2vec with random walk + skip-gram.
+    '''
     def __init__(self, graph, dim=64, p=1, q=1, num_walks=10, walk_len=20):
         self.graph = graph
         self.dim = dim
