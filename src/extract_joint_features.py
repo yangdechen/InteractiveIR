@@ -17,12 +17,14 @@ import networkx as nx
 from docopt import docopt
 from collections import defaultdict
 from util import read_keyword_dir
+from util import alias_setup
 
 class FeatGraph:
     '''Perform node2vec with random walk + skip-gram.
     '''
     def __init__(self, graph, dim=64, p=1, q=1, num_walks=10, walk_len=20):
-        self.graph = graph
+        self.sample_graph = {}
+        self.__setup_alias(graph)
         self.dim = dim
         self.p = p
         self.q = q
@@ -32,6 +34,18 @@ class FeatGraph:
     def run(self, n_iter=10):
         for _ in range(n_iter):
             pass
+
+    def __setup_alias(self, graph):
+        for n in graph.nodes_iter():
+            weight_table = []
+            connected_nodes = []
+            for e in G.edges(n):
+                weight_table.append(G.get_edge_data(*e)['weight'])
+                connected_nodes.append(e[1])
+            alias_table, prob_table = alias_setup(weight_table)
+            self.sample_graph[n] = {'connected_nodes': connected_nodes,
+                                    'alias_table': alias_table,
+                                    'prob_table': prob_table}
 
     def __random_walk_from_node(self, start_node):
         walk = [start_node]
