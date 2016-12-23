@@ -8,8 +8,8 @@
 '''main
 
 Usage:
-    main.py <ptv-query> <ptv-ans> <inv-index> <doc-len> <bg-lm>
-                <keyword-dir> <doc-dir> <sim_keyword_file>
+    main.py <flag> <ptv-query> <ptv-ans> <inv-index> <doc-len> <bg-lm>
+            <keyword-dir> <doc-dir> <sim_keyword_file> <model>
     main.py -h
 Options:
     -h --help       : show help messages
@@ -17,6 +17,7 @@ Options:
 from docopt import docopt
 from agent import Agent
 from environment import IIREnvironment
+import pickle
 
 def main(docopt_args):
     '''Experiment setup'''
@@ -43,10 +44,15 @@ def main(docopt_args):
         allowed_feedback_pos=5,
         feedback_weight=1,
         like_weight=1)
-    # Training
-    agent.play(n_episodes=100, isTraining=True)
-    # Testing
-    agent.play(n_episodes=100, isTraining=False)
+
+    if docopt_args['<flag>'] == 'train':
+        agent.play(n_episodes=100, isTraining=True)
+        with open(docopt_args['<model>'], 'wb') as f:
+            pickle.dump(agent.strategy, f)
+    elif docopt_args['<flag>'] == 'test':
+        with open(docopt_args['<model>'], 'rb') as f:
+            agent.strategy = pickle.load(f)
+        agent.play(n_episodes=100, isTraining=False)
 
 if __name__ == '__main__':
     main(docopt(__doc__))

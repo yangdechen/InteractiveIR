@@ -51,13 +51,15 @@ def pickle_load(filename):
     with open(filename, 'rb') as f:
         return pickle.load(f)
 
-def read_keyword_dir(dirname):
+def read_keyword_dir(dirname, thres=10000):
     '''Load keywords for each document'''
     keyword_dict = {}
     for filename, filepath in walk_all_files(dirname):
         with open(filepath) as keyfile:
             keyword_dict[filename] = []
-            for line in keyfile:
+            for ind, line in enumerate(keyfile):
+                if ind > thres:
+                    break
                 keyword, score = line.strip().split()
                 keyword_dict[filename].append((keyword, float(score)))
     return keyword_dict
@@ -104,3 +106,7 @@ def alias_draw(alias_table, prob_table):
         return ind
     else:
         return alias_table[ind]
+
+def normalize_to_prob(w_list):
+    c = sum(w_list)
+    return [x /c for x in w_list]
