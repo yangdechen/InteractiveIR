@@ -5,4 +5,5 @@ retrieval/
 user_sim/
 stopword.txt
 model/
+feats/
 *.pyc
