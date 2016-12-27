@@ -8,7 +8,7 @@
 '''extract_joint_features_efficient.py
 
 Usage:
-    extract_joint_features_efficient.py <keyword-dir> <feat-type> <output>
+    extract_joint_features_efficient.py <keyword-dir> <feat-type> <graph-out> <output>
     extract_joint_features_efficient.py -h
 Options:
     -h --help       : show help messages
@@ -21,6 +21,7 @@ from util import alias_draw
 from util import normalize_to_prob
 from tqdm import tqdm
 import random
+import pickle
 
 class FeatGraph:
     '''Perform node2vec with random walk + skip-gram'''
@@ -176,7 +177,18 @@ def main(docopt_args):
         node2id, rev_node2id, graph = build_graph(keyword_dict)
 
     print('setup up start')
-    feat_graph = FeatGraph(graph, node2id, rev_node2id)
+    feat_graph = FeatGraph(
+                    graph,
+                    node2id,
+                    rev_node2id,
+                    dim=64,
+                    p=1,
+                    q=1,
+                    num_walks=15,
+                    walk_len=20)
+    with open(docopt_args['<graph-out>'], 'wb') as graph_out:
+        pickle.dump({'node2id': node2id, 'rev_node2id': rev_node2id,
+                     'graph': feat_graph}, graph_out)
     print('setup up end')
     feat_graph.run_and_write(docopt_args['<output>'])
 

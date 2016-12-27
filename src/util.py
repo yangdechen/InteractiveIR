@@ -110,3 +110,20 @@ def alias_draw(alias_table, prob_table):
 def normalize_to_prob(w_list):
     c = sum(w_list)
     return [x /c for x in w_list]
+
+def read_word2vec(word2vec_filename):
+    '''
+    Args:
+      word2vec_filename: Mikolov word2vec text format
+    Returns:
+      word2vec_dict: a dictionary with word as key
+      dim: the dimension of the returned vector
+    '''
+    word2vec_dict = {}
+    with open(word2vec_filename) as infile:
+        num_words, dim = next(infile).strip().split()
+        for line in infile:
+            word, *vec = line.strip().split()
+            vec = np.array([float(v) for v in vec])
+            word2vec_dict[word] = vec
+        return word2vec_dict, dim

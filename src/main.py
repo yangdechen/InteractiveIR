@@ -9,7 +9,8 @@
 
 Usage:
     main.py <flag> <ptv-query> <ptv-ans> <inv-index> <doc-len> <bg-lm>
-            <keyword-dir> <doc-dir> <sim_keyword_file> <model>
+            <keyword-dir> <doc-dir> <sim_keyword_file> <keyword-vec>
+            <doc-vec> <model>
     main.py -h
 Options:
     -h --help       : show help messages
@@ -39,6 +40,8 @@ def main(docopt_args):
         ap_thres_min=0.1)
     agent = Agent(
         env=env,
+        keyword_vec_file=docopt_args['<keyword-vec>'],
+        doc_vec_file=docopt_args['<doc-vec>'],
         history_len=5,
         train_pool_size=64,
         allowed_feedback_pos=5,
@@ -46,13 +49,13 @@ def main(docopt_args):
         like_weight=1)
 
     if docopt_args['<flag>'] == 'train':
-        agent.play(n_episodes=100, isTraining=True)
+        agent.play(n_episodes=1000, isTraining=True)
         with open(docopt_args['<model>'], 'wb') as f:
             pickle.dump(agent.strategy, f)
     elif docopt_args['<flag>'] == 'test':
         with open(docopt_args['<model>'], 'rb') as f:
             agent.strategy = pickle.load(f)
-        agent.play(n_episodes=100, isTraining=False)
+        agent.play(n_episodes=1000, isTraining=False)
 
 if __name__ == '__main__':
     main(docopt(__doc__))

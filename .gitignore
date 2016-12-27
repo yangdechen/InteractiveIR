@@ -7,3 +7,4 @@ stopword.txt
 model/
 feats/
 *.pyc
+*.swo

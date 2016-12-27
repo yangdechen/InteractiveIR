@@ -11,10 +11,13 @@ from collections import deque
 from strategy import Strategy
 from environment import IIREnvironment
 from tqdm import tqdm
+from util import read_word2vec
+import numpy as np
 
 class Agent:
-    def __init__(self, env, history_len=5, train_pool_size=64,
-            allowed_feedback_pos=5, feedback_weight=1, like_weight=1):
+    def __init__(self, env, keyword_vec_file, doc_vec_file, history_len=5,
+            train_pool_size=64, allowed_feedback_pos=5, feedback_weight=1,
+            like_weight=1):
         '''Initialize necessary setup according to environment.
         Args:
           env: specify the environment
@@ -26,6 +29,9 @@ class Agent:
           like_weight(default=1): Weight the final like signal.
         '''
         self.env = env
+        self.doc_dict = self.env.retrieval_system.doc_dict
+        self.keyword_vec, self.kv_dim = read_word2vec(keyword_vec_file)
+        self.doc_vec, self.dv_dim = read_word2vec(doc_vec_file)
         self.history = deque(maxlen=history_len)
         self.train_pool_size = train_pool_size
         self.training_pool = deque(maxlen=train_pool_size)
@@ -33,7 +39,7 @@ class Agent:
         self.action_dict = { action: ind \
             for ind, action in enumerate(self.rev_action_dict) }
         self.action_num = len(self.action_dict)
-        self.state_dim = 7
+        self.state_dim = 27
         self.strategy = Strategy(self.action_num, self.state_dim)
         self.allowed_feedback_pos = allowed_feedback_pos
         self.feedback_weight = feedback_weight
@@ -139,10 +145,22 @@ class Agent:
         #   representation to fulfill the Markov property during
         #   reinforcement learning.
         num_result = 5
+        # Now, we only consider the most recent history
         action, reward, observ = self.history[-1]
         feat = [0 for _ in range(self.action_num + num_result)]
+        # previous action
         if action:
             feat[self.action_dict[action]] = 1
+        # top-ranked retrieval score
         for ind, (_, score) in enumerate(observ[:num_result]):
             feat[self.action_num + ind] = score
+        # top-ranked documents similarities
+        for i in range(num_result):
+            for j in range(num_result):
+                if j != i:
+                    if i >= len(observ) or j >= len(observ):
+                        feat.append(0.0)
+                    else:
+                        feat.append(np.dot(self.doc_vec[observ[i][0]],
+                                           self.doc_vec[observ[j][0]]))
         return feat

@@ -7,6 +7,7 @@
 #   User specifies the simulation behavior, and decide the difficulties of
 #   the task.
 '''User class'''
+import random
 
 POS_FEEDBACK=1
 NEG_FEEDBACK=-1
@@ -22,6 +23,7 @@ class User:
         self.curr_query = self.query_list[self.curr_query_index]
         self.patience = patience
         self.ap_threshold = ap_threshold
+        self.select_threshold = self.patience + random.randint(-2, 2)
         self.angry = 0
         self.ans_dict = ans_dict
         self.completed_queries = 0
@@ -57,6 +59,7 @@ class User:
                 num_ret += 1
                 AP += num_ret / (i+1) / len(self.ans_dict[query])
         return AP
+
     def next_query(self):
         self.curr_query_index += 1
         self.curr_query = self.query_list[self.curr_query_index]
@@ -96,17 +99,22 @@ class User:
         '''feedback document position '''
         for ind, (doc, score) in enumerate(ranking_list):
             if doc in self.ans_dict[''.join(self.curr_query)]:
+                if ind > self.select_threshold:
+                    self.angry += 1
                 return ind
+        self.angry += 1
         return None
 
     def __feedback_keyword(self, keyword_list):
         '''feedback keyword position'''
         for ind, keyword in enumerate(keyword_list):
             if keyword in User.sim_keyword[''.join(self.curr_query)]:
+                if ind > self.select_threshold:
+                    self.angry += 1
                 return ind
+        self.angry += 1
         return None
     def stats(self):
         '''This method is for performance measure.'''
         return (self.completed_queries, len(self.query_list),
                 self.angry / self.patience)
-
